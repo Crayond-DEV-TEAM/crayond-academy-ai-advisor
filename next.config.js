@@ -6,6 +6,19 @@ const nextConfig = {
   experimental: {
     // appDir: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://crayondacademy.com https://*.crayondacademy.com https://crayondacademy-dev-site.vercel.app",
+          },
+        ],
+      },
+    ]
+  },
   // fix all before production. Now it slow the develop speed.
   eslint: {
     // Warning: This allows production builds to successfully complete even if

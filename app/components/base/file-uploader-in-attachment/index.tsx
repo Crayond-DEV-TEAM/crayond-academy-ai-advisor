@@ -54,7 +54,7 @@ const FileUploaderInAttachment = ({
       <Button
         key={option.value}
         // variant='tertiary'
-        className={cn('relative grow', open && 'bg-components-button-tertiary-bg-hover')}
+        className={cn('relative grow', open && 'bg-white/[0.06]')}
         disabled={!!(fileConfig.number_limits && files.length >= fileConfig.number_limits)}
       >
         {option.icon}

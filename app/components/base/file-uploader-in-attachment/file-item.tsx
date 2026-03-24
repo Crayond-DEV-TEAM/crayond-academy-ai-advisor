@@ -47,8 +47,8 @@ const FileInAttachmentItem = ({
   return (
     <>
       <div className={cn(
-        'flex h-12 items-center rounded-lg border-[0.5px] border-components-panel-border bg-components-panel-on-panel-item-bg pr-3 shadow-xs',
-        progress === -1 && 'border-state-destructive-border bg-state-destructive-hover',
+        'flex h-12 items-center rounded-lg border border-white/[0.08] bg-white/[0.04] pr-3',
+        progress === -1 && 'border-red-500/30 bg-red-500/5',
       )}>
         <div className='flex h-12 w-12 items-center justify-center'>
           {
@@ -70,12 +70,12 @@ const FileInAttachmentItem = ({
         </div>
         <div className='mr-1 w-0 grow'>
           <div
-            className='system-xs-medium mb-0.5 flex items-center truncate text-text-secondary'
+            className='text-xs font-medium mb-0.5 flex items-center truncate text-gray-300'
             title={file.name}
           >
             <div className='truncate'>{name}</div>
           </div>
-          <div className='system-2xs-medium-uppercase flex items-center text-text-tertiary'>
+          <div className='text-[10px] font-medium uppercase flex items-center text-gray-500'>
             {
               ext && (
                 <span>{ext.toLowerCase()}</span>
@@ -83,7 +83,7 @@ const FileInAttachmentItem = ({
             }
             {
               ext && (
-                <span className='system-2xs-medium mx-1'>•</span>
+                <span className='text-[10px] mx-1'>•</span>
               )
             }
             {
@@ -108,7 +108,7 @@ const FileInAttachmentItem = ({
                 className='mr-1'
                 onClick={() => onReUpload?.(id)}
               >
-                <ReplayLine className='h-4 w-4 text-text-tertiary' />
+                <ReplayLine className='h-4 w-4 text-gray-500' />
               </ActionButton>
             )
           }

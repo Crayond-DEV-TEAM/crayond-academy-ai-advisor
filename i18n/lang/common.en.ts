@@ -14,8 +14,8 @@ const translation = {
     search: 'Search',
     send: 'Send',
     lineBreak: 'Line break',
-    like: 'like',
-    dislike: 'dislike',
+    like: 'Helpful',
+    dislike: 'Not helpful',
     ok: 'OK',
   },
   imageUploader: {
@@ -29,7 +29,7 @@ const translation = {
     imageUpload: 'Image Upload',
   },
   fileUploader: {
-    uploadFromComputer: 'Local upload',
+    uploadFromComputer: 'Upload resume or file',
     pasteFileLink: 'Paste file link',
     pasteFileLinkInputPlaceholder: 'Enter URL...',
     uploadFromComputerReadError: 'File reading failed, please try again.',

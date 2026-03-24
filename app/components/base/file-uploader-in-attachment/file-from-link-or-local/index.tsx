@@ -59,16 +59,16 @@ const FileFromLinkOrLocal = ({
         {trigger(open)}
       </PortalToFollowElemTrigger>
       <PortalToFollowElemContent className='z-[1001]'>
-        <div className='w-[280px] rounded-xl border-[0.5px] border-components-panel-border bg-components-panel-bg-blur p-3 shadow-lg'>
+        <div className='w-[280px] rounded-xl border border-white/[0.08] bg-[#1e1d2e] backdrop-blur-lg p-3 shadow-xl shadow-black/40'>
           {
             showFromLink && (
               <>
                 <div className={cn(
-                  'flex h-8 items-center rounded-lg border border-components-input-border-active bg-components-input-bg-active p-1 shadow-xs',
-                  showError && 'border-components-input-border-destructive',
+                  'flex h-8 items-center rounded-lg border border-white/[0.08] bg-white/[0.04] p-1',
+                  showError && 'border-red-500/30',
                 )}>
                   <input
-                    className='system-sm-regular mr-0.5 block grow appearance-none bg-transparent px-1 outline-none'
+                    className='text-sm mr-0.5 block grow appearance-none bg-transparent px-1 outline-none text-white'
                     placeholder={t('common.fileUploader.pasteFileLinkInputPlaceholder') || ''}
                     value={url}
                     onChange={(e) => {
@@ -90,7 +90,7 @@ const FileFromLinkOrLocal = ({
                 </div>
                 {
                   showError && (
-                    <div className='body-xs-regular mt-0.5 text-text-destructive'>
+                    <div className='text-xs mt-0.5 text-red-400'>
                       {t('common.fileUploader.pasteFileLinkInvalid')}
                     </div>
                   )
@@ -100,10 +100,10 @@ const FileFromLinkOrLocal = ({
           }
           {
             showFromLink && showFromLocal && (
-              <div className='system-2xs-medium-uppercase flex h-7 items-center p-2 text-text-quaternary'>
-                <div className='mr-2 h-[1px] w-[93px] bg-gradient-to-l from-[rgba(16,24,40,0.08)]' />
+              <div className='text-[10px] font-medium uppercase flex h-7 items-center p-2 text-gray-600'>
+                <div className='mr-2 h-[1px] w-[93px] bg-gradient-to-l from-white/[0.06]' />
                 OR
-                <div className='ml-2 h-[1px] w-[93px] bg-gradient-to-r from-[rgba(16,24,40,0.08)]' />
+                <div className='ml-2 h-[1px] w-[93px] bg-gradient-to-r from-white/[0.06]' />
               </div>
             )
           }

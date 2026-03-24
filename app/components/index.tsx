@@ -6,16 +6,14 @@ import produce, { setAutoFreeze } from 'immer'
 import { useBoolean, useGetState } from 'ahooks'
 import useConversation from '@/hooks/use-conversation'
 import Toast from '@/app/components/base/toast'
-import Sidebar from '@/app/components/sidebar'
 import ConfigSence from '@/app/components/config-scence'
 import Header from '@/app/components/header'
-import { fetchAppParams, fetchChatList, fetchConversations, generationConversationName, sendChatMessage, updateFeedback } from '@/service'
+import { fetchAppParams, fetchChatList, fetchConversations, fetchSuggestedQuestions, generationConversationName, sendChatMessage, updateFeedback } from '@/service'
 import type { ChatItem, ConversationItem, Feedbacktype, PromptConfig, VisionFile, VisionSettings } from '@/types/app'
 import type { FileUpload } from '@/app/components/base/file-uploader-in-attachment/types'
 import { Resolution, TransferMethod, WorkflowRunningStatus } from '@/types/app'
 import Chat from '@/app/components/chat'
 import { setLocaleOnClient } from '@/i18n/client'
-import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import Loading from '@/app/components/base/loading'
 import { replaceVarWithValues, userInputsFormToPromptVariables } from '@/utils/prompt'
 import AppUnavailable from '@/app/components/app-unavailable'
@@ -29,8 +27,6 @@ export interface IMainProps {
 
 const Main: FC<IMainProps> = () => {
   const { t } = useTranslation()
-  const media = useBreakpoints()
-  const isMobile = media === MediaType.mobile
   const hasSetAppConfig = APP_ID && API_KEY
 
   /*
@@ -40,8 +36,6 @@ const Main: FC<IMainProps> = () => {
   const [isUnknownReason, setIsUnknownReason] = useState<boolean>(false)
   const [promptConfig, setPromptConfig] = useState<PromptConfig | null>(null)
   const [inited, setInited] = useState<boolean>(false)
-  // in mobile, show sidebar by click button
-  const [isShowSidebar, { setTrue: showSidebar, setFalse: hideSidebar }] = useBoolean(false)
   const [visionConfig, setVisionConfig] = useState<VisionSettings | undefined>({
     enabled: false,
     number_limits: 2,
@@ -51,7 +45,7 @@ const Main: FC<IMainProps> = () => {
   const [fileConfig, setFileConfig] = useState<FileUpload | undefined>()
 
   useEffect(() => {
-    if (APP_INFO?.title) { document.title = `${APP_INFO.title} - Powered by Dify` }
+    if (APP_INFO?.title) { document.title = APP_INFO.title }
   }, [APP_INFO?.title])
 
   // onData change thought (the produce obj). https://github.com/immerjs/immer/issues/576
@@ -165,7 +159,6 @@ const Main: FC<IMainProps> = () => {
     }
     // trigger handleConversationSwitch
     setCurrConversationId(id, APP_ID)
-    hideSidebar()
   }
 
   /*
@@ -299,6 +292,14 @@ const Main: FC<IMainProps> = () => {
     notify({ type: 'error', message })
   }
 
+  const handleStop = () => {
+    if (abortController) {
+      abortController.abort()
+      setAbortController(null)
+    }
+    setRespondingFalse()
+  }
+
   const checkCanSend = () => {
     if (currConversationId !== '-1') { return true }
 
@@ -395,7 +396,7 @@ const Main: FC<IMainProps> = () => {
       id: questionId,
       content: message,
       isAnswer: false,
-      message_files: (files || []).filter((f: any) => f.type === 'image'),
+      message_files: files || [],
     }
 
     const placeholderAnswerId = `answer-placeholder-${Date.now()}`
@@ -522,6 +523,11 @@ const Main: FC<IMainProps> = () => {
         })
       },
       onMessageEnd: (messageEnd) => {
+        // Capture suggested questions from message_end metadata (if present)
+        if (messageEnd.metadata?.suggested_questions?.length) {
+          responseItem.suggestedQuestions = messageEnd.metadata.suggested_questions
+        }
+
         if (messageEnd.metadata?.annotation_reply) {
           responseItem.id = messageEnd.id
           responseItem.annotation = ({
@@ -552,6 +558,21 @@ const Main: FC<IMainProps> = () => {
           },
         )
         setChatList(newListWithAnswer)
+
+        // Fetch suggested questions from Dify API (GET /messages/{id}/suggested)
+        if (messageEnd.id) {
+          fetchSuggestedQuestions(messageEnd.id).then((res: any) => {
+            // API route returns { result, data } or the data array directly
+            const raw = Array.isArray(res) ? res : (res?.data || [])
+            const questions = raw.map((q: any) => typeof q === 'string' ? q : q.content).filter(Boolean)
+            if (questions?.length) {
+              setChatList(produce(getChatList(), (draft) => {
+                const msg = draft.find(item => item.id === responseItem.id)
+                if (msg) { msg.suggestedQuestions = questions }
+              }))
+            }
+          }).catch(() => {})
+        }
       },
       onMessageReplace: (messageReplace) => {
         setChatList(produce(
@@ -634,42 +655,24 @@ const Main: FC<IMainProps> = () => {
     notify({ type: 'success', message: t('common.api.success') })
   }
 
-  const renderSidebar = () => {
-    if (!APP_ID || !APP_INFO || !promptConfig) { return null }
-    return (
-      <Sidebar
-        list={conversationList}
-        onCurrentIdChange={handleConversationIdChange}
-        currentId={currConversationId}
-        copyRight={APP_INFO.copyright || APP_INFO.title}
-      />
-    )
-  }
+  // Check if embedded in iframe via query param
+  const [isEmbed, setIsEmbed] = useState(false)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setIsEmbed(params.get('embed') === 'true')
+  }, [])
 
   if (appUnavailable) { return <AppUnavailable isUnknownReason={isUnknownReason} errMessage={!hasSetAppConfig ? 'Please set APP_ID and API_KEY in config/index.tsx' : ''} /> }
 
   if (!APP_ID || !APP_INFO || !promptConfig) { return <Loading type='app' /> }
 
   return (
-    <div className='bg-gray-100'>
-      <Header
-        title={APP_INFO.title}
-        isMobile={isMobile}
-        onShowSideBar={showSidebar}
-        onCreateNewChat={() => handleConversationIdChange('-1')}
-      />
-      <div className="flex rounded-t-2xl bg-white overflow-hidden">
-        {/* sidebar */}
-        {!isMobile && renderSidebar()}
-        {isMobile && isShowSidebar && (
-          <div className='fixed inset-0 z-50' style={{ backgroundColor: 'rgba(35, 56, 118, 0.2)' }} onClick={hideSidebar} >
-            <div className='inline-block' onClick={e => e.stopPropagation()}>
-              {renderSidebar()}
-            </div>
-          </div>
-        )}
-        {/* main */}
-        <div className='flex-grow flex flex-col h-[calc(100vh_-_3rem)] overflow-y-auto'>
+    <div className='bg-gray-950 flex flex-col h-screen'>
+      {!isEmbed && (
+        <Header title={APP_INFO.title} />
+      )}
+      <div className="flex-grow flex flex-col overflow-hidden">
+        <div className='flex-grow flex flex-col overflow-y-auto'>
           <ConfigSence
             conversationName={conversationName}
             hasSetInputs={hasSetInputs}
@@ -684,12 +687,13 @@ const Main: FC<IMainProps> = () => {
 
           {
             hasSetInputs && (
-              <div className='relative grow pc:w-[794px] max-w-full mobile:w-full pb-[180px] mx-auto mb-3.5' ref={chatListDomRef}>
+              <div className='relative grow max-w-xl w-full pb-[180px] mx-auto px-4' ref={chatListDomRef}>
                 <Chat
                   chatList={chatList}
                   onSend={handleSend}
                   onFeedback={handleFeedback}
                   isResponding={isResponding}
+                  onStop={handleStop}
                   checkCanSend={checkCanSend}
                   visionConfig={visionConfig}
                   fileConfig={fileConfig}

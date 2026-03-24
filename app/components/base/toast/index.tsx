@@ -36,38 +36,38 @@ const Toast = ({
   if (typeof message !== 'string') { return null }
 
   return <div className={classNames(
-    'fixed rounded-md p-4 my-4 mx-8 z-50',
+    'fixed rounded-xl p-4 my-4 mx-4 z-50 shadow-xl shadow-black/30 border backdrop-blur-sm',
     'top-0',
     'right-0',
-    type === 'success' ? 'bg-green-50' : '',
-    type === 'error' ? 'bg-red-50' : '',
-    type === 'warning' ? 'bg-yellow-50' : '',
-    type === 'info' ? 'bg-blue-50' : '',
+    type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20' : '',
+    type === 'error' ? 'bg-red-500/10 border-red-500/20' : '',
+    type === 'warning' ? 'bg-yellow-500/10 border-yellow-500/20' : '',
+    type === 'info' ? 'bg-[#665cd7]/10 border-[#665cd7]/20' : '',
   )}>
     <div className="flex">
       <div className="flex-shrink-0">
-        {type === 'success' && <CheckCircleIcon className="w-5 h-5 text-green-400" aria-hidden="true" />}
+        {type === 'success' && <CheckCircleIcon className="w-5 h-5 text-emerald-400" aria-hidden="true" />}
         {type === 'error' && <XCircleIcon className="w-5 h-5 text-red-400" aria-hidden="true" />}
         {type === 'warning' && <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400" aria-hidden="true" />}
-        {type === 'info' && <InformationCircleIcon className="w-5 h-5 text-blue-400" aria-hidden="true" />}
+        {type === 'info' && <InformationCircleIcon className="w-5 h-5 text-[#a89df0]" aria-hidden="true" />}
       </div>
       <div className="ml-3">
         <h3 className={
           classNames(
             'text-sm font-medium',
-            type === 'success' ? 'text-green-800' : '',
-            type === 'error' ? 'text-red-800' : '',
-            type === 'warning' ? 'text-yellow-800' : '',
-            type === 'info' ? 'text-blue-800' : '',
+            type === 'success' ? 'text-emerald-300' : '',
+            type === 'error' ? 'text-red-300' : '',
+            type === 'warning' ? 'text-yellow-300' : '',
+            type === 'info' ? 'text-[#a89df0]' : '',
           )
         }>{message}</h3>
         {children && <div className={
           classNames(
             'mt-2 text-sm',
-            type === 'success' ? 'text-green-700' : '',
-            type === 'error' ? 'text-red-700' : '',
-            type === 'warning' ? 'text-yellow-700' : '',
-            type === 'info' ? 'text-blue-700' : '',
+            type === 'success' ? 'text-emerald-400' : '',
+            type === 'error' ? 'text-red-400' : '',
+            type === 'warning' ? 'text-yellow-400' : '',
+            type === 'info' ? 'text-gray-400' : '',
           )
         }>
           {children}

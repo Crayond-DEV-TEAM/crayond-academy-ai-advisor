@@ -4,11 +4,10 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import TemplateVarPanel, { PanelTitle, VarOpBtnGroup } from '../value-panel'
 import FileUploaderInAttachmentWrapper from '../base/file-uploader-in-attachment'
-import s from './style.module.css'
-import { AppInfoComp, ChatBtn, EditBtn, FootLogo, PromptTemplate } from './massive-component'
+import { AppInfoComp, ChatBtn, EditBtn, PromptTemplate } from './massive-component'
 import type { AppInfo, PromptConfig } from '@/types/app'
 import Toast from '@/app/components/base/toast'
-import Select from '@/app/components/base/select'
+import * as RadixSelect from '@radix-ui/react-select'
 import { DEFAULT_VALUE_MAX_LEN } from '@/config'
 
 // regex to match the {{}} and replace it with a span
@@ -80,43 +79,76 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   const renderHeader = () => {
-    return (
-      <div className='absolute top-0 left-0 right-0 flex items-center justify-between border-b border-gray-100 mobile:h-12 tablet:h-16 px-8 bg-white'>
-        <div className='text-gray-900'>{conversationName}</div>
-      </div>
-    )
+    // Hidden in single-conversation mode — no conversation name needed
+    return null
   }
 
   const renderInputs = () => {
+    const inputClass = 'w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder-gray-600 text-sm focus:outline-none focus:border-[#665cd7]/50 focus:bg-white/[0.06] transition-colors'
+
     return (
-      <div className='space-y-3'>
+      <div className='space-y-4'>
         {promptConfig.prompt_variables.map(item => (
-          <div className='tablet:flex items-start mobile:space-y-2 tablet:space-y-0 mobile:text-xs tablet:text-sm' key={item.key}>
-            <label className={`flex-shrink-0 flex items-center tablet:leading-9 mobile:text-gray-700 tablet:text-gray-900 mobile:font-medium pc:font-normal ${s.formLabel}`}>{item.name}</label>
+          <div className='space-y-1.5' key={item.key}>
+            <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider">
+              {item.name}
+              {item.required !== false && <span className="text-red-400 ml-0.5">*</span>}
+              {item.required === false && <span className="text-gray-600 normal-case tracking-normal ml-1">({t('app.variableTable.optional')})</span>}
+            </label>
             {item.type === 'select'
               && (
-                <Select
-                  className='w-full'
-                  defaultValue={inputs?.[item.key]}
-                  onSelect={(i) => { setInputs({ ...inputs, [item.key]: i.value }) }}
-                  items={(item.options || []).map(i => ({ name: i, value: i }))}
-                  allowSearch={false}
-                  bgClassName='bg-gray-50'
-                />
+                <RadixSelect.Root value={inputs?.[item.key] || undefined} onValueChange={(val) => { setInputs({ ...inputs, [item.key]: val }) }}>
+                  <RadixSelect.Trigger
+                    className={`group w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm flex items-center justify-between outline-none transition-colors data-[state=open]:border-[#665cd7]/50 data-[state=open]:bg-white/[0.06] hover:border-white/[0.15] ${inputs?.[item.key] ? 'text-white' : 'text-gray-500'}`}
+                  >
+                    <span className="flex-1 min-w-0 truncate text-left">
+                      <RadixSelect.Value placeholder="Select..." />
+                    </span>
+                    <RadixSelect.Icon asChild>
+                      <svg
+                        className="w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </RadixSelect.Icon>
+                  </RadixSelect.Trigger>
+                  <RadixSelect.Portal>
+                    <RadixSelect.Content
+                      position="popper"
+                      sideOffset={6}
+                      className="z-[9999] w-[var(--radix-select-trigger-width)] rounded-xl bg-[#1e1d2e] border border-white/[0.08] shadow-xl shadow-black/40 overflow-hidden"
+                    >
+                      <RadixSelect.Viewport>
+                        {(item.options || []).map(opt => (
+                          <RadixSelect.Item
+                            key={opt}
+                            value={opt}
+                            className="px-4 py-2.5 text-sm text-gray-300 outline-none cursor-pointer transition-colors data-[highlighted]:bg-white/[0.06] data-[highlighted]:text-white data-[state=checked]:bg-[#665cd7]/20 data-[state=checked]:text-[#a89df0]"
+                          >
+                            <RadixSelect.ItemText>{opt}</RadixSelect.ItemText>
+                          </RadixSelect.Item>
+                        ))}
+                      </RadixSelect.Viewport>
+                    </RadixSelect.Content>
+                  </RadixSelect.Portal>
+                </RadixSelect.Root>
               )}
             {item.type === 'string' && (
               <input
-                placeholder={`${item.name}${!item.required ? `(${t('app.variableTable.optional')})` : ''}`}
+                placeholder={item.name}
                 value={inputs?.[item.key] || ''}
                 onChange={(e) => { setInputs({ ...inputs, [item.key]: e.target.value }) }}
-                className={'w-full flex-grow py-2 pl-3 pr-3 box-border rounded-lg bg-gray-50'}
+                className={inputClass}
                 maxLength={item.max_length || DEFAULT_VALUE_MAX_LEN}
               />
             )}
             {item.type === 'paragraph' && (
               <textarea
-                className="w-full h-[104px] flex-grow py-2 pl-3 pr-3 box-border rounded-lg bg-gray-50"
-                placeholder={`${item.name}${!item.required ? `(${t('app.variableTable.optional')})` : ''}`}
+                className={`${inputClass} h-[104px]`}
+                placeholder={item.name}
                 value={inputs?.[item.key] || ''}
                 onChange={(e) => { setInputs({ ...inputs, [item.key]: e.target.value }) }}
               />
@@ -124,8 +156,8 @@ const Welcome: FC<IWelcomeProps> = ({
             {item.type === 'number' && (
               <input
                 type="number"
-                className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500 "
-                placeholder={`${item.name}${!item.required ? `(${t('appDebug.variableTable.optional')})` : ''}`}
+                className={inputClass}
+                placeholder={item.name}
                 value={inputs[item.key]}
                 onChange={(e) => { onInputsChange({ ...inputs, [item.key]: e.target.value }) }}
               />
@@ -236,7 +268,7 @@ const Welcome: FC<IWelcomeProps> = ({
       >
         {renderInputs()}
         <ChatBtn
-          className='mt-3 mobile:ml-0 tablet:ml-[128px]'
+          className='mt-4'
           onClick={handleChat}
         />
       </TemplateVarPanel>
@@ -289,8 +321,8 @@ const Welcome: FC<IWelcomeProps> = ({
             />
             <PromptTemplate html={highLightPromoptTemplate} />
             {isFold && (
-              <div className='flex items-center justify-between mt-3 border-t border-indigo-100 pt-4 text-xs text-indigo-600'>
-                <span className='text-gray-700'>{t('app.chat.configStatusDes')}</span>
+              <div className='flex items-center justify-between mt-3 border-t border-white/[0.06] pt-4 text-xs text-[#a89df0]'>
+                <span className='text-gray-400'>{t('app.chat.configStatusDes')}</span>
                 <EditBtn onClick={() => setIsFold(false)} />
               </div>
             )}
@@ -310,7 +342,7 @@ const Welcome: FC<IWelcomeProps> = ({
       <TemplateVarPanel
         isFold={isFold}
         header={
-          <div className='flex items-center justify-between text-indigo-600'>
+          <div className='flex items-center justify-between text-[#a89df0]'>
             <PanelTitle
               title={!isFold ? t('app.chat.privatePromptConfigTitle') : t('app.chat.configStatusDes')}
             />
@@ -327,24 +359,61 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   const renderHasSetInputs = () => {
-    if ((!isPublicVersion && !canEditInputs) || !hasVar) { return null }
+    if (!hasVar || !canEditInputs) { return null }
 
     return (
-      <div
-        className='pt-[88px] mb-5'
-      >
-        {isPublicVersion ? renderHasSetInputsPublic() : renderHasSetInputsPrivate()}
-      </div>)
+      <div className='flex justify-center py-2'>
+        {isFold
+          ? (
+            <button
+              type="button"
+              className='flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-gray-400 hover:text-[#a89df0] hover:border-[#665cd7]/30 transition-colors'
+              onClick={() => setIsFold(false)}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Edit your details
+            </button>
+          )
+          : (
+            <div className='w-full max-w-xl px-4'>
+              <div className='rounded-xl border border-white/[0.08] bg-white/[0.02] p-4'>
+                <div className='flex items-center justify-between mb-3'>
+                  <span className='text-xs font-medium text-gray-400'>Edit your details</span>
+                  <button
+                    type="button"
+                    className='text-xs text-gray-500 hover:text-gray-300 transition-colors'
+                    onClick={() => { setInputs(savedInputs); setIsFold(true) }}
+                  >Cancel</button>
+                </div>
+                {renderInputs()}
+                <div className='mt-3 flex justify-end'>
+                  <button
+                    type="button"
+                    className='px-4 py-2 rounded-lg bg-[#665cd7] text-white text-xs font-medium hover:bg-[#5a51c4] transition-colors'
+                    onClick={() => {
+                      if (!canChat()) { return }
+                      onInputsChange(inputs)
+                      setIsFold(true)
+                    }}
+                  >Save</button>
+                </div>
+              </div>
+            </div>
+          )
+        }
+      </div>
+    )
   }
 
   return (
-    <div className='relative mobile:min-h-[48px] tablet:min-h-[64px]'>
+    <div className='relative'>
       {hasSetInputs && renderHeader()}
-      <div className='mx-auto pc:w-[794px] max-w-full mobile:w-full px-3.5'>
+      <div className='mx-auto max-w-xl w-full px-4'>
         {/*  Has't set inputs  */}
         {
           !hasSetInputs && (
-            <div className='mobile:pt-[72px] tablet:pt-[128px] pc:pt-[200px]'>
+            <div className='pt-2 tablet:pt-4 relative'>
+              <div className="brand-glow top-0 right-0 -translate-y-1/2 translate-x-1/4" />
               {hasVar
                 ? (
                   renderVarPanel()
@@ -360,24 +429,16 @@ const Welcome: FC<IWelcomeProps> = ({
         {hasSetInputs && renderHasSetInputs()}
 
         {/* foot */}
-        {!hasSetInputs && (
-          <div className='mt-4 flex justify-between items-center h-8 text-xs text-gray-400'>
-
-            {siteInfo.privacy_policy
-              ? <div>{t('app.chat.privacyPolicyLeft')}
-                <a
-                  className='text-gray-500'
-                  href={siteInfo.privacy_policy}
-                  target='_blank'
-                >{t('app.chat.privacyPolicyMiddle')}</a>
-                {t('app.chat.privacyPolicyRight')}
-              </div>
-              : <div>
-              </div>}
-            <a className='flex items-center pr-3 space-x-3' href="https://dify.ai/" target="_blank">
-              <span className='uppercase'>{t('app.chat.powerBy')}</span>
-              <FootLogo />
-            </a>
+        {!hasSetInputs && siteInfo.privacy_policy && (
+          <div className='mt-4 flex justify-center items-center h-8 text-xs text-gray-600'>
+            <div>{t('app.chat.privacyPolicyLeft')}
+              <a
+                className='text-gray-500 hover:text-[#a89df0] transition-colors'
+                href={siteInfo.privacy_policy}
+                target='_blank'
+              >{t('app.chat.privacyPolicyMiddle')}</a>
+              {t('app.chat.privacyPolicyRight')}
+            </div>
           </div>
         )}
       </div>

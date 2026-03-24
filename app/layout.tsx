@@ -11,7 +11,12 @@ const LocaleLayout = async ({
   const locale = await getLocaleOnServer()
   return (
     <html lang={locale ?? 'en'} className="h-full">
-      <body className="h-full">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+      </head>
+      <body className="h-full bg-gray-950 font-body text-gray-300">
         <div className="overflow-x-auto">
           <div className="w-screen h-screen min-w-[300px]">
             {children}

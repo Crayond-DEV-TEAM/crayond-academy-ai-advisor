@@ -2,11 +2,11 @@
 
 @layer components {
     .action-btn {
-        @apply inline-flex justify-center items-center cursor-pointer text-text-tertiary hover:text-text-secondary hover:bg-state-base-hover
+        @apply inline-flex justify-center items-center cursor-pointer text-gray-500 hover:text-gray-300 hover:bg-white/[0.06] transition-colors
     }
 
     .action-btn-hover {
-        @apply bg-state-base-hover
+        @apply bg-white/[0.06]
     }
 
     .action-btn-disabled {
@@ -31,15 +31,15 @@
     }
 
     .action-btn.action-btn-active {
-        @apply text-text-accent bg-state-accent-active hover:bg-state-accent-active-alt
+        @apply text-[#a89df0] bg-[#665cd7]/20 hover:bg-[#665cd7]/30
     }
 
     .action-btn.action-btn-disabled {
-        @apply text-text-disabled
+        @apply text-gray-600
     }
 
     .action-btn.action-btn-destructive {
-        @apply text-text-destructive bg-state-destructive-hover
+        @apply text-red-400 bg-red-400/10
     }
 
 }

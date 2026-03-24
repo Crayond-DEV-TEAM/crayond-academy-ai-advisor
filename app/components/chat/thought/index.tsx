@@ -28,10 +28,17 @@ const Thought: FC<IThoughtProps> = ({
   isFinished,
 }) => {
   const [toolNames, isValueArray]: [string[], boolean] = (() => {
+    // Dify sends multiple tool names as semicolon-separated: "get_profile;current_time"
+    // or as JSON array: ["get_profile","current_time"]
     try {
-      if (Array.isArray(JSON.parse(thought.tool))) { return [JSON.parse(thought.tool), true] }
+      const parsed = JSON.parse(thought.tool)
+      if (Array.isArray(parsed)) { return [parsed, true] }
     }
     catch (e) {
+    }
+    // Handle semicolon-separated tool names from Dify agent mode
+    if (thought.tool.includes(';')) {
+      return [thought.tool.split(';').map(t => t.trim()), true]
     }
     return [[thought.tool], false]
   })()

@@ -15,47 +15,58 @@ module.exports = {
           300: '#D1D5DB',
           400: '#9CA3AF',
           500: '#6B7280',
+          600: '#4B5563',
           700: '#374151',
           800: '#1F2A37',
           900: '#111928',
+          950: '#030712',
         },
         primary: {
-          50: '#EBF5FF',
-          100: '#E1EFFE',
-          200: '#C3DDFD',
-          300: '#A4CAFE',
-          600: '#1C64F2',
-          700: '#1A56DB',
+          50: '#f0eefb',
+          100: '#e0dcf7',
+          200: '#c1b9ef',
+          300: '#a89df0',
+          400: '#8a7de5',
+          500: '#7b6fe0',
+          600: '#665cd7',
+          700: '#5a51c4',
+          800: '#4a42a3',
+          900: '#3a3482',
         },
-        blue: {
-          500: '#E1EFFE',
+        brand: {
+          purple: '#665cd7',
+          'purple-light': '#a89df0',
+          'purple-deep': '#5248c8',
+          'dark-bg': '#242438',
+          'dark-navy': '#2b2a35',
         },
         green: {
           50: '#F3FAF7',
           100: '#DEF7EC',
           800: '#03543F',
-
         },
         yellow: {
           100: '#FDF6B2',
           800: '#723B13',
         },
-        purple: {
-          50: '#F6F5FF',
-        },
-        indigo: {
-          25: '#F5F8FF',
-          100: '#E0EAFF',
-          600: '#444CE7',
-        },
       },
       screens: {
         mobile: '100px',
-        // => @media (min-width: 100px) { ... }
-        tablet: '640px', // 391
-        // => @media (min-width: 600px) { ... }
+        tablet: '640px',
         pc: '769px',
-        // => @media (min-width: 769px) { ... }
+      },
+      fontFamily: {
+        display: ['Raleway', 'sans-serif'],
+        body: ['Lato', 'sans-serif'],
+      },
+      keyframes: {
+        'pulse-dot': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'pulse-dot': 'pulse-dot 1.5s ease-in-out infinite',
       },
     },
   },

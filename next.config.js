@@ -13,7 +13,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://crayondacademy.com https://*.crayondacademy.com https://crayondacademy-dev-site.vercel.app",
+            value: "frame-ancestors 'self' https://crayondacademy.com https://*.crayondacademy.com https://crayondacademy-dev-site.vercel.app http://localhost:3008",
           },
         ],
       },

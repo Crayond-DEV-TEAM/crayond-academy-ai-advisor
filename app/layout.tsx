@@ -6,7 +6,7 @@ import './styles/markdown.scss'
 
 export const metadata: Metadata = {
   title: 'Crayond Academy AI Advisor',
-  description: 'Chat with our AI Advisor to find the right program for your career goals. Powered by Crayond Academy.',
+  description: 'See where you stand vs what the market pays — takes 2 mins. Our AI Advisor helps you find the right Crayond Academy program for your background and goals.',
   icons: {
     icon: '/crayond-icon.svg',
     shortcut: '/crayond-icon.svg',

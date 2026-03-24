@@ -1,7 +1,18 @@
+import type { Metadata } from 'next'
 import { getLocaleOnServer } from '@/i18n/server'
 
 import './styles/globals.css'
 import './styles/markdown.scss'
+
+export const metadata: Metadata = {
+  title: 'Crayond Academy AI Advisor',
+  description: 'Chat with our AI Advisor to find the right program for your career goals. Powered by Crayond Academy.',
+  icons: {
+    icon: '/crayond-icon.svg',
+    shortcut: '/crayond-icon.svg',
+    apple: '/crayond-icon.svg',
+  },
+}
 
 const LocaleLayout = async ({
   children,

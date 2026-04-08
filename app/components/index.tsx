@@ -74,6 +74,7 @@ const Main: FC<IMainProps> = () => {
     setCurrInputs,
     setNewConversationInfo,
     setExistConversationInfo,
+    setExistConversationInputs,
   } = useConversation()
 
   const [conversationIdChangeBecauseOfNew, setConversationIdChangeBecauseOfNew, getConversationIdChangeBecauseOfNew] = useGetState(false)
@@ -472,6 +473,8 @@ const Main: FC<IMainProps> = () => {
           ).catch(() => {})
         }
         setConversationIdChangeBecauseOfNew(false)
+        // Preserve inputs for subsequent turns — Dify requires them on every request
+        if (newConversationInputs) { setExistConversationInputs({ ...newConversationInputs }) }
         resetNewConversationInputs()
         setChatNotStarted()
         setCurrConversationId(tempNewConversationId, APP_ID, true)

@@ -461,13 +461,15 @@ const Main: FC<IMainProps> = () => {
         if (hasError) { return }
 
         if (getConversationIdChangeBecauseOfNew()) {
-          const { data: allConversations }: any = await fetchConversations()
-          const newItem: any = await generationConversationName(allConversations[0].id)
-
-          const newAllConversations = produce(allConversations, (draft: any) => {
-            draft[0].name = newItem.name
-          })
-          setConversationList(newAllConversations as any)
+          // Fire-and-forget: don't block input while Dify generates conversation name
+          fetchConversations().then(({ data: allConversations }: any) =>
+            generationConversationName(allConversations[0].id).then((newItem: any) => {
+              const newAllConversations = produce(allConversations, (draft: any) => {
+                draft[0].name = newItem.name
+              })
+              setConversationList(newAllConversations as any)
+            }),
+          ).catch(() => {})
         }
         setConversationIdChangeBecauseOfNew(false)
         resetNewConversationInputs()

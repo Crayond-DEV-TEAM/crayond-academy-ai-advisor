@@ -74,7 +74,6 @@ const Main: FC<IMainProps> = () => {
     setCurrInputs,
     setNewConversationInfo,
     setExistConversationInfo,
-    setExistConversationInputs,
   } = useConversation()
 
   const [conversationIdChangeBecauseOfNew, setConversationIdChangeBecauseOfNew, getConversationIdChangeBecauseOfNew] = useGetState(false)
@@ -462,25 +461,24 @@ const Main: FC<IMainProps> = () => {
         if (hasError) { return }
 
         if (getConversationIdChangeBecauseOfNew()) {
-          // Fire-and-forget: don't block input while Dify generates conversation name
-          fetchConversations().then(({ data: allConversations }: any) =>
+          try {
+            const { data: allConversations }: any = await fetchConversations()
+            // Only the rename is fire-and-forget (7-16s LLM call).
+            // fetchConversations is still awaited to keep state in sync.
             generationConversationName(allConversations[0].id).then((newItem: any) => {
               const newAllConversations = produce(allConversations, (draft: any) => {
                 draft[0].name = newItem.name
               })
               setConversationList(newAllConversations as any)
-            }),
-          ).catch(() => {})
+            }).catch(() => {})
+          }
+          catch {}
         }
-        // Preserve inputs for subsequent turns — Dify requires them on every request
-        if (newConversationInputs) { setExistConversationInputs({ ...newConversationInputs }) }
+        setConversationIdChangeBecauseOfNew(false)
         resetNewConversationInputs()
         setChatNotStarted()
         setCurrConversationId(tempNewConversationId, APP_ID, true)
         setRespondingFalse()
-        // Reset flag AFTER conv ID change — deferred so the handleConversationSwitch
-        // effect sees it as true and skips the history reload (prevents duplicate messages)
-        setTimeout(() => setConversationIdChangeBecauseOfNew(false), 0)
       },
       onFile(file) {
         const lastThought = responseItem.agent_thoughts?.[responseItem.agent_thoughts?.length - 1]

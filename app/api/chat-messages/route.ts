@@ -16,8 +16,9 @@ export async function POST(request: NextRequest) {
   // on follow-up messages, fetch the original inputs from the conversation.
   if (conversationId && (!inputs || Object.keys(inputs).length === 0)) {
     try {
-      const { data } = await client.getConversations(user, undefined, 100)
-      const conv = data.find((c: any) => c.id === conversationId)
+      const res = await client.getConversations(user, undefined, 100)
+      const conversations = res.data?.data || res.data || []
+      const conv = conversations.find((c: any) => c.id === conversationId)
       if (conv?.inputs) { inputs = conv.inputs }
     }
     catch {}

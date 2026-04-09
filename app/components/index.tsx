@@ -472,13 +472,15 @@ const Main: FC<IMainProps> = () => {
             }),
           ).catch(() => {})
         }
-        setConversationIdChangeBecauseOfNew(false)
         // Preserve inputs for subsequent turns — Dify requires them on every request
         if (newConversationInputs) { setExistConversationInputs({ ...newConversationInputs }) }
         resetNewConversationInputs()
         setChatNotStarted()
         setCurrConversationId(tempNewConversationId, APP_ID, true)
         setRespondingFalse()
+        // Reset flag AFTER conv ID change — deferred so the handleConversationSwitch
+        // effect sees it as true and skips the history reload (prevents duplicate messages)
+        setTimeout(() => setConversationIdChangeBecauseOfNew(false), 0)
       },
       onFile(file) {
         const lastThought = responseItem.agent_thoughts?.[responseItem.agent_thoughts?.length - 1]

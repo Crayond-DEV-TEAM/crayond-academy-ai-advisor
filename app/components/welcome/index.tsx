@@ -214,6 +214,14 @@ const Welcome: FC<IWelcomeProps> = ({
       logError(t('app.errorMessage.valueOfVarRequired'))
       return false
     }
+    // Validate WhatsApp — must be exactly 10 digits (strip +91/91 prefix if present)
+    if (inputs.whatsapp) {
+      const digits = inputs.whatsapp.replace(/\s+/g, '').replace(/^\+?91/, '')
+      if (!/^\d{10}$/.test(digits)) {
+        logError('Please enter a valid 10-digit WhatsApp number')
+        return false
+      }
+    }
     return true
   }
 

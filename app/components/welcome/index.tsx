@@ -222,6 +222,13 @@ const Welcome: FC<IWelcomeProps> = ({
         return false
       }
     }
+    // Validate email format if provided
+    if (inputs.email && inputs.email.trim() !== '') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputs.email.trim())) {
+        logError('Please enter a valid email address')
+        return false
+      }
+    }
     return true
   }
 
